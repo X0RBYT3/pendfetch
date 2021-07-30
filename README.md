@@ -13,6 +13,7 @@
 
 - [Features](#features)
 - [Demo](#demo)
+- [Quickstart](#demo)
 - [Args](#args)
 - [TODO](#todo)
 
@@ -24,6 +25,14 @@
 
 ## Demo: 
 https://user-images.githubusercontent.com/11583852/127576299-a97625a4-69bc-4887-8793-972192db6086.mov
+
+## Quickstart:
+
+__Dependencies:__ Python 3.2+, UNIX system.
+
+- Clone using `https://github.com/Nekurone/double-pendulum-ascii.git` or download the zip. 
+- Extract if necessary and head inside the file
+- ```python3 double_pendulum.py [args]```
 
 ## Args
 |short|long|help|default
