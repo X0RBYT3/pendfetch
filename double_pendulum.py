@@ -98,6 +98,16 @@ d_HEIGHT = 40
 def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
     for i in range(no_of_pendulums):
         # Define them all manually for that sweet chaos
+        # EDIT THESE IF YOU WANT TO MANUALLY CHANGE PARAMETERS. #
+        # See above for types.
+
+        # Rate at which the trails fade
+        trace_drop_off = 1.0
+        # Speed at which it runs
+        # Edit the float for the love of god
+        # Around 1.5 is good.
+        speed = 1.5 * 10
+        no_of_pendulums = no_of_pendulums
         # Length
         length_1[i] = length
         length_2[i] = length
@@ -124,17 +134,17 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
     # Initialise board
     if trace:
         trace = [[0] * int(WIDTH / d_WIDTH) for x in range(int(HEIGHT / d_HEIGHT))]
-    f = 0
 
     while True:
-        f += 1
         current = datetime.now()
+        # Divide by timedelta to acheive float.
         accumulator += (current - frame_start) / timedelta(microseconds=1)
         frame_start = current
         if accumulator >= 1.0 / 30.0:
             accumulator = 1.0 / 30.0
         while accumulator > dt:
             for i in range(no_of_pendulums):
+
                 a1 = (
                     -g * (2 * mass_1[i] + mass_2[i]) * sin(O1[i])
                     - g * mass_2[i] * sin(O1[i] - 2 * O2[i])
@@ -153,6 +163,7 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
                         - mass_2[i] * cos(2 * O1[i] - 2 * O2[i])
                     )
                 )
+
                 a2 = (
                     (2 * sin(O1[i] - O2[i]))
                     * (
@@ -172,16 +183,16 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
                     )
                 )
                 ## Just trust them.
-                omega_1[i] += 15 * dt * a1
-                omega_2[i] += 15 * dt * a2
-                O1[i] += 15 * omega_1[i] * dt
-                O2[i] += 15 * omega_2[i] * dt
+                omega_1[i] += speed * dt * a1
+                omega_2[i] += speed * dt * a2
+                O1[i] += speed * omega_1[i] * dt
+                O2[i] += speed * omega_2[i] * dt
             accumulator -= dt
             if trace:
                 for i in range(int(HEIGHT / d_HEIGHT)):
                     for j in range(int(WIDTH / d_WIDTH)):
                         if trace[i][j] > 0:
-                            trace[i][j] -= 1
+                            trace[i][j] -= trace_drop_off
         if not trace:
             stdscr.clear()
         for i in range(floor(HEIGHT / d_HEIGHT)):
@@ -232,8 +243,8 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
         stdscr.addstr(
             0,
             0,
-            "Flo's Double Pendulum. Number of Pendulums: {0},Time:{1}.".format(
-                no_of_pendulums, floor(f / 30)
+            "Flo's Double Pendulum. Number of Pendulums: {0}.".format(
+                no_of_pendulums
             ),
         )
         stdscr.refresh()
@@ -290,7 +301,7 @@ def main(argv):
             *OPTIONS
         )
     )
-    sleep(3ß)
+    sleep(3)
     sim(*OPTIONS)
 
 
