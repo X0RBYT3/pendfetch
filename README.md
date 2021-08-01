@@ -40,12 +40,12 @@ __Dependencies:__ Python 3.2+,curses (standard on UNIX), psutils if you want to 
 
 ### Github
 - Clone using `https://github.com/Nekurone/double-pendulum-ascii.git` or download the zip.
-- Extract if necessary and head inside the folder `double-pendulum`
+- Extract if necessary and head inside the folder.
 - ```python3 pendulum.py [args]```
 
 ### Pip
-- `python3 -m pip install double-pendulum-ascii`
-- `python3 -m double-pendulum [args]`
+- `python3 -m pip install double-pendulum`
+- `double-pendulum [args]`
 
 ## Args
 |short|long|help|default
