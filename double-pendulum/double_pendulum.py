@@ -1,12 +1,24 @@
 from math import pi, sin, cos, floor, copysign
 from time import sleep
 from datetime import datetime, timedelta
-import curses
 import sys, argparse, textwrap
-
+import os
+try:
+    import curses
+except ModuleNotFoundError:
+    if os.name == 'nt':
+        print('Windows port of curses not found. Try python3 -m pip install windows-curses')
+        sys.exit(0)
+    else:
+        print('Couldn\'t load Curses for some reason.')
+        sys.exit(0)
 # Not clean, but it works
-# Board drawing functions
+
+# Defined for stats
+
+
 def draw_point(screen: curses.window, A: int, B: int, c: str):
+    # Check if coords are out of bounds
     if A < 0 or B < 0 or A >= WIDTH / d_WIDTH or B >= HEIGHT / d_HEIGHT:
         return
     screen.addstr(int(B), int(A), c)
@@ -22,12 +34,12 @@ def draw_line(screen: curses.window, A: float, B: float, C: float, D: float, c: 
             draw_point(screen, i, B, c)
 
     if A == C:
-        mi = B
-        ma = D
+        min = B
+        max = D
         if D < B:
-            mi = D
-            ma = B
-        for i in range(int(mi), int(ma) + 1):
+            min = D
+            max = B
+        for i in range(int(min), int(Using_the_MultiMaps_extension) + 1):
             draw_point(screen, A, i, c)
     if abs(D - B) < abs(C - A):
         plot_line_low(screen, A, B, C, D, c)
@@ -95,7 +107,7 @@ d_WIDTH = 14
 d_HEIGHT = 40
 
 
-def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
+def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: bool):
     for i in range(no_of_pendulums):
         # Define them all manually for that sweet chaos
         # EDIT THESE IF YOU WANT TO MANUALLY CHANGE PARAMETERS. #
@@ -130,11 +142,30 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
     stdscr = curses.initscr()
     curses.resizeterm(HEIGHT, WIDTH)
     stdscr.clear()
-
+    # Specs Stuff
+    if specs:
+        # Yes this is an absolute mess.
+        import platform,socket,re,uuid,json,psutil,logging
+        # psutil is the big one.
+        def get_system_info():
+            try:
+                info={}
+                # Hacky and could be better
+                info['Platform']=platform.system()
+                info['Platform Release']=platform.release()
+                #info['platform-version']=platform.version()
+                info['Architecture']=platform.machine()
+                info['Hostname']=socket.gethostname()
+                info['Processor']=platform.processor()
+                info['RAM']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
+                return info
+            except Exception as e:
+                logging.exception(e)
+        system_specs = get_system_info()
     # Initialise board
     if trace:
         trace = [[0] * int(WIDTH / d_WIDTH) for x in range(int(HEIGHT / d_HEIGHT))]
-
+    [[0] * int(WIDTH / d_WIDTH) for x in range(int(HEIGHT / d_HEIGHT))]
     while True:
         current = datetime.now()
         # Divide by timedelta to acheive float.
@@ -152,7 +183,7 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
                     * mass_2[i]
                     * sin(O1[i] - O2[i])
                     * (
-                        omega_2[i] * omega_2[i] * length_2[i]
+                        omega_2[i] ** 2 * length_2[i]
                         + omega_1[i] * omega_1[i] * length_1[i] * cos(O1[i] - O2[i])
                     )
                 ) / (
@@ -195,6 +226,7 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
                             trace[i][j] -= trace_drop_off
         if not trace:
             stdscr.clear()
+
         for i in range(floor(HEIGHT / d_HEIGHT)):
             # for j in range(floor(WIDTH/d_WIDTH)):
             #        stdscr.addstr(i,j,' ')
@@ -205,10 +237,13 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
                         trace[i][j] = fps
                     if trace[i][j] >= 3 * int(fps / 4):
                         stdscr.addstr(i, j, ":")
+
                     elif trace[i][j] >= 2 * int(fps / 4):
                         stdscr.addstr(i, j, ".")
+
                     elif trace[i][j] >= int(fps / 4):
                         if (i + j) % 2:
+
                             stdscr.addstr(i, j, ".")
                         else:
                             stdscr.addstr(i, j, " ")
@@ -234,12 +269,19 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float):
                 draw_point(stdscr, x2, y2, "@")
             else:
                 draw_line(
-                    stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, "."
+                    stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, "#"
                 )
-                draw_line(stdscr, x1, y1, x2, y2, ".")
-                draw_point(stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "O")
+                draw_line(stdscr, x1, y1, x2, y2, "#")
+                draw_point( stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "O")
                 draw_point(stdscr, x1, y1, "@")
                 draw_point(stdscr, x2, y2, "@")
+        if specs:
+            for i, x in enumerate(system_specs.keys()):
+                stdscr.addstr(
+                i+5,
+                0,
+                '{0}: {1}'.format(x,system_specs[x].title())
+                )
         stdscr.addstr(
             0,
             0,
@@ -265,6 +307,9 @@ def main(argv):
     )
     parser.add_argument(
         "-t", "--trace", help="Enables tracing on pendulums", action="store_true"
+    )
+    parser.add_argument(
+        "-s", "--specs", help="Enables displaying specs down the side. REQUIRES PSUTIL", action="store_true"
     )
     parser.add_argument(
         "-p",
@@ -295,9 +340,9 @@ def main(argv):
     args = parser.parse_args()
     # Because I'm an idiot and I made order matter (groan)
     v = vars(args)
-    OPTIONS = [v["pendulums"], v["trace"], v["length"], v["mass"]]
+    OPTIONS = [v["pendulums"], v["trace"], v["length"], v["mass"],v["specs"]]
     print(
-        "Running with {0} Pendulums, Trace set to {1}, Length of {2} and Mass of {3} ".format(
+        "Running with {0} Pendulums, Specs set to {4}, Trace set to {1}, Length of {2} and Mass of {3}".format(
             *OPTIONS
         )
     )
