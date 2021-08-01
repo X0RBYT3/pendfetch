@@ -1,6 +1,6 @@
 <h1 align="center">Double Pendulum Using Curses in Python.</h1>
 
-<p align="center"><a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Build with <3" /></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with python" /></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/powered-by-coffee.svg"/></p>
+<p align="center"><a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Build with <3" height="35"/></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with python" height="35" /></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/powered-by-coffee.svg" height="35"/></p>
 
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 
 </p>
-<p align="center">A nice relaxing double pendulum simulation using ASCII, able to simulate multiple pendulums at once, and provide tracing of pendulums.</p>
+<p align="center">A nice relaxing double pendulum simulation using ASCII, able to simulate multiple pendulums at once, and provide tracing of pendulums as well as providing some system information.</p>
 
 ## Table of Contents
 
