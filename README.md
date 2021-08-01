@@ -3,8 +3,13 @@
 <p align="center"><a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Build with <3" /></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with python" /></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/powered-by-coffee.svg"/></p>
 
 
-<p align="center"><a href="https://github.com/psf/black" target="_blank"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" /></a>&nbsp;<a href="http://makeapullrequest.com" target="_blank"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields"/></p>
+<p align="center"><a href="https://github.com/psf/black" target="_blank"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" height="18" /></a>&nbsp;
+<a href="https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fpypi.org%2Fproject%2Fdouble-pendulum%2F1.0.4%2F"><img alt="Twitter" src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fpypi.org%2Fproject%2Fdouble-pendulum%2F1.0.4%2F" height="18"></a>
+<a href="http://makeapullrequest.com" target="_blank"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields" height="18"/>&nbsp;
+<a href="https://badge.fury.io/py/double-pendulum"><img src="https://badge.fury.io/py/double-pendulum.svg" alt="PyPI version" height="18"></a>
 
+
+</p>
 <p align="center">A nice relaxing double pendulum simulation using ASCII, able to simulate multiple pendulums at once, and provide tracing of pendulums.</p>
 
 ## Table of Contents
@@ -35,12 +40,12 @@ __Dependencies:__ Python 3.2+,curses (standard on UNIX), psutils if you want to 
 
 ### Github
 - Clone using `https://github.com/Nekurone/double-pendulum-ascii.git` or download the zip.
-- Extract if necessary and head inside the folder `double-pendulum`
+- Extract if necessary and head inside the folder.
 - ```python3 pendulum.py [args]```
 
 ### Pip
-- `python3 -m pip install double-pendulum-ascii`
-- `python3 -m double-pendulum [args]`
+- `python3 -m pip install double-pendulum`
+- `double-pendulum [args]`
 
 ## Args
 |short|long|help|default
