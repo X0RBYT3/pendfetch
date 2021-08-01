@@ -292,7 +292,7 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
         stdscr.refresh()
 
 
-def main(argv):
+def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(
@@ -351,4 +351,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
