@@ -20,6 +20,9 @@ setuptools.setup(
         "Intended Audience :: End Users/Desktop",
         "Topic :: Terminals"
     ],
+    install_requires=[
+        'windows-curses; platform_system == "Windows"'
+    ],
     entry_points = {
         "console_scripts":[
             "double-pendulum=pendulum:main"
