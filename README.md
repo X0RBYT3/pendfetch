@@ -18,7 +18,9 @@
 
 
 </p>
-<p align="center">A nice relaxing double pendulum simulation using ASCII, able to simulate multiple pendulums at once, and provide tracing of pendulums as well as providing some system information.</p>
+<p align="center">A nice relaxing double pendulum simulation using ASCII, able to simulate multiple pendulums at once, and provide tracing of pendulums as well as providing some system information. 
+
+If you spot any bugs or features that need adding (especially with the specs), just open an issue :)</p>
 
 ## Table of Contents
 
@@ -32,15 +34,17 @@
 - As mentioned, able to simulate multiple pendulums at once.
 - Able to specify the weight and mass of pendulums to create different butterfly effects.
 - Uses equations from [here.](https://www.myphysicslab.com/pendulum/double-pendulum-en.html)
-- If -s is used, it grabs system specs and displays them (hi r/unixporn)
+- If -s is used, it grabs system specs and displays them.
+
+
+
+ (hi r/unixporn)
 - Obviously a lot could be done to it (see below the Args), Any contributions are appreciated)
 
 ## Demo:
 
 
-https://user-images.githubusercontent.com/11583852/127770473-25e63061-cca6-4ca3-997f-d3d1b1469652.mov
-
-
+https://user-images.githubusercontent.com/11583852/128070537-351afd65-ac32-452e-b159-af0c4115ea97.mov
 
 ## Quickstart:
 
@@ -63,8 +67,7 @@ __Dependencies:__ Python 3.2+,curses (standard on UNIX) or relevent windows port
 |-p| --pendulums |  Number of pendulums | 1|
 |-m| --mass | Starting mass of pendulums | 100.0|
 |-l| --length | Starting length of the arms | 250.0|
-|-s| --specs | Enables Specs Mode | off |
----------------------------------------------------
+|-s| --specs | Enables Specs Mode (REQUIRES UNIX)| off |
 
 ## TODO
 
@@ -72,9 +75,9 @@ Note I will not be updating the words on this TODO, but rather just checking the
 
 - [x] Add windows functionality
 - [ ] Add more functionality to arguments (epsilon, weight1, weight2)
-- [ ] General cleanup of variable names
+- [x] General cleanup of variable names
 - [ ] Improve efficiency (esp in lists)
-- [ ] Add colors :)
+- [x] Add colors :)
 
 <h3 align="center">If you have any suggestions, or anything you'd like to add (or, more likely you found a bug) just open a PR :)</h3>
 
