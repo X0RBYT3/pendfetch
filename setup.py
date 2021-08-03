@@ -5,14 +5,14 @@ with open("README.md",'r') as ld:
 
 setuptools.setup(
     name="double-pendulum",
-    version="1.0.14",
+    version="1.0.21",
     author="Nekurone",
     author_email="florencesecure@protonmail.com",
     description="A small double pendulum simulator",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Nekurone/double-pendulum-ascii/",
-    py_modules = ["pendulum"],
+    py_modules = ["pendulum",'grabsys'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
