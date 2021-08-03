@@ -5,17 +5,23 @@ import sys, argparse, textwrap
 import os
 import curses
 import platform
+import time
 # Not clean, but it works
 
-# Defined for stats
-
-
-def draw_point(screen: curses.window, A: int, B: int, c: str):
+def draw_point(screen: curses.window, A: int, B: int, c: str,color=True):
+    # Broken for now while I update. Check back soon :)
+    color = False
     # Check if coords are out of bounds
     if A < 0 or B < 0 or A >= WIDTH / d_WIDTH or B >= HEIGHT / d_HEIGHT:
         return
-    screen.addstr(int(B), int(A), c)
-
+    try:
+        if color:
+            screen.addstr(int(B), int(A), c,curses.color_pair(int(B)%8+8))
+        else:
+            screen.addstr(int(B), int(A), c)
+    except curses.error:
+        pass
+    # curses.color_pair(int(B)%16)
 
 def draw_line(screen: curses.window, A: float, B: float, C: float, D: float, c: str):
 
@@ -34,8 +40,10 @@ def draw_line(screen: curses.window, A: float, B: float, C: float, D: float, c: 
             max = B
         for i in range(int(min), int(Using_the_MultiMaps_extension) + 1):
             draw_point(screen, A, i, c)
+
     if abs(D - B) < abs(C - A):
         plot_line_low(screen, A, B, C, D, c)
+
     else:
         if B > D:
             plot_line_high(screen, C, D, A, B, c)
@@ -46,6 +54,7 @@ def draw_line(screen: curses.window, A: float, B: float, C: float, D: float, c: 
 def plot_line_low(
     screen: curses.window, x0: float, y0: float, x1: float, y1: float, c: str
 ):
+
     dx = x1 - x0
     dy = y1 - y0
     yi = 1
@@ -54,8 +63,10 @@ def plot_line_low(
     dy = abs(dy)
     D = 2 * dy - dx
     y = y0
+
     for x in range(int(x0), int(x1) + 1):
         draw_point(screen, x, y, c)
+
         if D > 0:
             y += yi
             D -= 2 * dx
@@ -79,6 +90,7 @@ def plot_line_high(
 
     for y in range(int(y0), int(y1) + 1):
         draw_point(screen, x, y, c)
+
         if D > 0:
             x += xi
             D -= 2 * dy
@@ -92,50 +104,52 @@ length_1, length_2 = {}, {}  # Lengths
 mass_1, mass_2 = {}, {}  # Masses
 O1, O2 = {}, {}  # Angles
 omega_1, omega_2 = {}, {}  # Angular Velocities
-
 # Screen parameters
-WIDTH = 1540
-HEIGHT = 1600
+WIDTH = 1460
+HEIGHT = 1500
 d_WIDTH = 14
 d_HEIGHT = 40
 
 
-def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: bool):
+def sim(stdscr,no_of_pendulums: int, trace: bool, length: float, mass: float,specs: bool):
     for i in range(no_of_pendulums):
         # Define them all manually for that sweet chaos
         # EDIT THESE IF YOU WANT TO MANUALLY CHANGE PARAMETERS. #
         # See above for types.
 
-        # Rate at which the trails fade
-        trace_drop_off = 1.0
-        # Speed at which it runs
-        # Edit the float for the love of god
-        # Around 1.5 is good.
-        speed = 1.5 * 10
+
         no_of_pendulums = no_of_pendulums
+
         # Length
         length_1[i] = length
         length_2[i] = length
+
         # Mass
         mass_1[i] = mass
         mass_2[i] = mass
-        # Original angle to be offset slightly
 
+        # Original angle to be offset slightly
         O1[i] = 2.0 * pi / 2.0 + epsilon * (float(2 * i - no_of_pendulums + 4))
         O2[i] = 2.0 * pi / 2.0
+
         ## Angular Velocity
         omega_1[i] = 0.0
         omega_2[i] = 0.0
-
+    # Speed at which it runs
+    # Edit the float for the love of god
+    # Around 1-1.5 is good.
+    speed = 1.0 * 10
+    # Rate at which the trails fades, higher = faster fade.
+    trace_drop_off = 1.0
+    trace_color = 0 # 0-8
     fps = 300.0
     dt = 1.0 / fps
     accumulator = 0.0
     frame_start = datetime.now()
     # Actually initialise window Now
-    stdscr = curses.initscr()
-    curses.resize_term(HEIGHT, WIDTH)
-    stdscr.erase()
     # Init colours
+    stdscr.resize(WIDTH,HEIGHT)
+    stdscr.clear()
     curses.start_color()
     curses.use_default_colors()
     for i in range(0, curses.COLORS):
@@ -147,21 +161,22 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
             specs = False
         else:
             import grabsys
-        # Yes this is an absolute mess.
-        # We need to grab colors
-        # This is the most painful way possible
             sys_specs = grabsys.get_system_info()
     # Initialise board
     if trace:
         trace = [[0] * int(WIDTH / d_WIDTH) for x in range(int(HEIGHT / d_HEIGHT))]
     [[0] * int(WIDTH / d_WIDTH) for x in range(int(HEIGHT / d_HEIGHT))]
+
+    # The main loop.
     while True:
         current = datetime.now()
+
         # Divide by timedelta to acheive float.
         accumulator += (current - frame_start) / timedelta(microseconds=1)
         frame_start = current
         if accumulator >= 1.0 / 30.0:
             accumulator = 1.0 / 30.0
+        # Prepare for a calculations headache.
         while accumulator > dt:
             for i in range(no_of_pendulums):
 
@@ -213,33 +228,36 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
                     for j in range(int(WIDTH / d_WIDTH)):
                         if trace[i][j] > 0:
                             trace[i][j] -= trace_drop_off
-        if not trace:
-            stdscr.clear()
+        try:
+            for i in range(floor(HEIGHT / d_HEIGHT)):
+                # for j in range(floor(WIDTH/d_WIDTH)):
+                #        stdscr.addstr(i,j,' ')
+                for j in range(floor(WIDTH / d_WIDTH)):
+                    if trace:
+                        if stdscr.inch(i, j) == ord("@"):
+                            # stdscr.addstr(6, 0, "Tracing")
+                            trace[i][j] = fps
 
-        for i in range(floor(HEIGHT / d_HEIGHT)):
-            # for j in range(floor(WIDTH/d_WIDTH)):
-            #        stdscr.addstr(i,j,' ')
-            for j in range(floor(WIDTH / d_WIDTH)):
-                if trace:
-                    if stdscr.inch(i, j) == ord("@"):
-                        # stdscr.addstr(6, 0, "Tracing")
-                        trace[i][j] = fps
-                    if trace[i][j] >= 3 * int(fps / 4):
-                        stdscr.addstr(i, j, ":")
+                        if trace[i][j] >= 3 * int(fps / 4):
+                            stdscr.addstr(i,j, ":",curses.color_pair(trace_color+8))
+                        elif trace[i][j] >= 2 * int(fps / 4):
+                            stdscr.addstr(i,j, ".",curses.color_pair(trace_color+9))
 
-                    elif trace[i][j] >= 2 * int(fps / 4):
-                        stdscr.addstr(i, j, ".")
-
-                    elif trace[i][j] >= int(fps / 4):
-                        if (i + j) % 2:
-
-                            stdscr.addstr(i, j, ".")
+                        elif trace[i][j] >= int(fps / 4):
+                            if (i + j) % 2:
+                                stdscr.addstr(i,j, ".",curses.color_pair(trace_color+11))
+                            else:
+                                stdscr.addstr(i,j, " ")
                         else:
-                            stdscr.addstr(i, j, " ")
+                            stdscr.addstr(i,j, " ")
                     else:
-                        stdscr.addstr(i, j, " ")
-                if i < int(HEIGHT / d_HEIGHT / 2):
-                    draw_point(stdscr, WIDTH / 2 / d_WIDTH, i, "|")
+                        stdscr.addstr(i,j, " ")
+                    if i < int(HEIGHT / d_HEIGHT / 2):
+                        stdscr.addstr(int(i),int(WIDTH / 2 / d_WIDTH), "|",curses.color_pair(i%8+8))
+        except curses.error as e:
+            pass
+
+
         for i in range(no_of_pendulums):
             x1 = (WIDTH / 2 + sin(O1[i]) * length_1[i] + d_WIDTH * 0.5) / d_WIDTH
             y1 = (
@@ -253,29 +271,31 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
                 )
                 draw_line(stdscr, x1, y1, x2, y2, "*")
                 # stdscr.addstr(0,0,'{} {} {} {}'.format(x1,y1,x2,y2))
-                draw_point(stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "O")
-                draw_point(stdscr, x1, y1, "@")
-                draw_point(stdscr, x2, y2, "@")
+                draw_point(stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "@")
+                draw_point(stdscr, x1, y1, "@",color=False)
+                draw_point(stdscr, x2, y2, "@",color=False)
             else:
                 draw_line(
                     stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, "#"
                 )
                 draw_line(stdscr, x1, y1, x2, y2, "#")
-                draw_point( stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "O")
-                draw_point(stdscr, x1, y1, "@")
-                draw_point(stdscr, x2, y2, "@")
+                draw_point( stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "@")
+                draw_point(stdscr, x1, y1, "@",color=False)
+                draw_point(stdscr, x2, y2, "@",color=False)
+
+
         if specs:
+            stdscr.addstr(2,0,'-'*30,curses.color_pair(2))
             for i, x in enumerate(sys_specs.keys()):
-                stdscr.addstr(
-                i+5,
-                0,
-                '{0}: {1}'.format(x,sys_specs[x].title())
-                )
+                stdscr.addstr(i+3,0,str(x),curses.color_pair(4))
+
+                stdscr.addstr(i+3,(len(x)+1),': {0}'.format(sys_specs[x].title()))
+
             # Add the colours
             for y in range(0,2): ##For a 2x8 Grid
                 for x in range(0,8):
                     i = y*4+x
-                    stdscr.addstr(int(HEIGHT/d_HEIGHT)-y-8,int(WIDTH/d_WIDTH)-(2*x)-16,'██',curses.color_pair(i))
+                    stdscr.addstr(y+20,2*x,'██',curses.color_pair(i))
         stdscr.addstr(
             0,
             0,
@@ -287,19 +307,15 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
         stdscr.refresh()
 
 
-def main():
+def start(stdscr):
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=textwrap.dedent(
-            """\
-           Flo's Glorious Pendulum!
-        --------------------------------
-           Good luck solving this code
-       Not even I know what half of it does
-              Enjoy either way <3
-                       """
-        ),
-    )
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    help = ['',
+    "         Flo's Glorious Pendulum!",
+    "     --------------------------------",
+    "       Good luck solving this code",
+    "   Not even I know what half of it does",
+    "          Enjoy either way <3"]
     parser.add_argument(
         "-t", "--trace", help="Enables tracing on pendulums", action="store_true"
     )
@@ -328,22 +344,26 @@ def main():
         help="Mass of pendulums",
         action="store",
         type=float,
-        default=100.0,
+        default=150.0,
     )
     # parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,help=help_str)
-    parser.print_help()
+    #parser.print_help()
     args = parser.parse_args()
     # Because I'm an idiot and I made order matter (groan)
     v = vars(args)
     OPTIONS = [v["pendulums"], v["trace"], v["length"], v["mass"],v["specs"]]
-    print(
+    for i, k in enumerate(help):
+        stdscr.addstr(i+2,0,k)
+    stdscr.addstr(9,0,
         "Running with {0} Pendulums, Specs set to {4}, Trace set to {1}, Length of {2} and Mass of {3}".format(
             *OPTIONS
         )
     )
+    stdscr.refresh()
     sleep(3)
-    sim(*OPTIONS)
+    sim(stdscr,*OPTIONS)
 
-
+def main():
+    curses.wrapper(start)
 if __name__ == "__main__":
     main()
