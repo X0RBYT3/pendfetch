@@ -3,15 +3,8 @@ from time import sleep
 from datetime import datetime, timedelta
 import sys, argparse, textwrap
 import os
-try:
-    import curses
-except ModuleNotFoundError:
-    if os.name == 'nt':
-        print('Windows port of curses not found. Try python3 -m pip install windows-curses')
-        sys.exit(0)
-    else:
-        print('Couldn\'t load Curses for some reason.')
-        sys.exit(0)
+import curses
+import platform
 # Not clean, but it works
 
 # Defined for stats
@@ -101,8 +94,8 @@ O1, O2 = {}, {}  # Angles
 omega_1, omega_2 = {}, {}  # Angular Velocities
 
 # Screen parameters
-WIDTH = 1440
-HEIGHT = 1200
+WIDTH = 1540
+HEIGHT = 1600
 d_WIDTH = 14
 d_HEIGHT = 40
 
@@ -130,7 +123,7 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
 
         O1[i] = 2.0 * pi / 2.0 + epsilon * (float(2 * i - no_of_pendulums + 4))
         O2[i] = 2.0 * pi / 2.0
-        ## Angular Velocity
+        ## Angular Velocity
         omega_1[i] = 0.0
         omega_2[i] = 0.0
 
@@ -140,28 +133,24 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
     frame_start = datetime.now()
     # Actually initialise window Now
     stdscr = curses.initscr()
-    curses.resizeterm(HEIGHT, WIDTH)
-    stdscr.clear()
+    curses.resize_term(HEIGHT, WIDTH)
+    stdscr.erase()
+    # Init colours
+    curses.start_color()
+    curses.use_default_colors()
+    for i in range(0, curses.COLORS):
+        curses.init_pair(i + 1, i, -1)
     # Specs Stuff
     if specs:
+        if platform.os == 'Windows':
+            print('Unfortunately -s --specs isn\'t available for windows right now.')
+            specs = False
+        else:
+            import grabsys
         # Yes this is an absolute mess.
-        import platform,socket,re,uuid,json,psutil,logging
-        # psutil is the big one.
-        def get_system_info():
-            try:
-                info={}
-                # Hacky and could be better
-                info['Platform']=platform.system()
-                info['Platform Release']=platform.release()
-                #info['platform-version']=platform.version()
-                info['Architecture']=platform.machine()
-                info['Hostname']=socket.gethostname()
-                info['Processor']=platform.processor()
-                info['RAM']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
-                return info
-            except Exception as e:
-                logging.exception(e)
-        system_specs = get_system_info()
+        # We need to grab colors
+        # This is the most painful way possible
+            sys_specs = grabsys.get_system_info()
     # Initialise board
     if trace:
         trace = [[0] * int(WIDTH / d_WIDTH) for x in range(int(HEIGHT / d_HEIGHT))]
@@ -276,18 +265,24 @@ def sim(no_of_pendulums: int, trace: bool, length: float, mass: float,specs: boo
                 draw_point(stdscr, x1, y1, "@")
                 draw_point(stdscr, x2, y2, "@")
         if specs:
-            for i, x in enumerate(system_specs.keys()):
+            for i, x in enumerate(sys_specs.keys()):
                 stdscr.addstr(
                 i+5,
                 0,
-                '{0}: {1}'.format(x,system_specs[x].title())
+                '{0}: {1}'.format(x,sys_specs[x].title())
                 )
+            # Add the colours
+            for y in range(0,2): ##For a 2x8 Grid
+                for x in range(0,8):
+                    i = y*4+x
+                    stdscr.addstr(int(HEIGHT/d_HEIGHT)-y-8,int(WIDTH/d_WIDTH)-(2*x)-16,'██',curses.color_pair(i))
         stdscr.addstr(
             0,
             0,
             "Flo's Double Pendulum. Number of Pendulums: {0}.".format(
                 no_of_pendulums
             ),
+            curses.color_pair(5)
         )
         stdscr.refresh()
 
