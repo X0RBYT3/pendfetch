@@ -6,24 +6,26 @@ import socket
 import psutil
 # psutil is the big one.
 
-linux_res = [
+def process(command: str):
+    return subprocess.Popen(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE
+        ).communicate()[0].decode('utf-8')
 
-]
 def grab_res():
     if platform.system() == 'Darwin':
         '''
         Interesting way to get res on macos
         '''
-        res = subprocess.Popen(
-          'system_profiler SPDisplaysDataType | grep Resolution',
-          shell=True,
-          stdout=subprocess.PIPE).communicate()[0].decode('utf-8').split('Resolution: ')[1].strip()
+        res = process('system_profiler SPDisplaysDataType | grep Resolution'
+        ).split('Resolution: ')[1].strip()
+
     elif platform.system() == 'Linux':
         '''If this doesn't work on your distro, let me know and i'll fix it.'''
-        res = subprocess.Popen(
-            'xrandr | grep "\*" | cut -d" " -f4',
-            shell=True,
-            stdout=subprocess.PIPE).communicate()[0].decode('utf-8').strip()
+        res = process(
+            'xrandr | grep "\*" | cut -d" " -f4'
+            ).strip()
     return res
 
 def get_uptime():
@@ -32,11 +34,11 @@ def get_uptime():
         shell=True,
         stdout=subprocess.PIPE
     ).communicate()[0].decode('utf-8').replace("up ", "")'''
-    return ' '.join([i.strip() for i in subprocess.Popen(
-        'uptime',
-        shell=True,
-        stdout=subprocess.PIPE
-    ).communicate()[0].decode('utf-8').replace("up ", "").split(',')[:3]])
+    if platform.system() == 'Linux':
+        return process('uptime -p').replace("up ","")
+    return ' '.join([i.strip() for i in process(
+        'uptime'
+        ).replace("up ", "").split(',')[:3]])
 
 def detect_desktop_environment():
     desktop_environment = 'generic'
@@ -57,11 +59,9 @@ def detect_desktop_environment():
 
 def get_user():
     username = environ['USER']
-    hostname = subprocess.Popen(
+    hostname = process(
             'hostname',
-            shell=True,
-            stdout=subprocess.PIPE
-        ).communicate()[0].decode('utf-8').strip().rstrip('\n')
+        ).strip().rstrip('\n')
     return f'{username}@{hostname}'
 
 def get_system_info():
@@ -86,9 +86,9 @@ def get_system_info():
     # Hacky and could be better
     info['Hostname']=socket.gethostname()
     info['Uptime'] = get_uptime()
-    info['OS']=" ".join(platform.platform().split('-'))
+    info['OS']=platform.platform(aliased=True).split('-')[0]
     info['Kernel'] = platform.release()
-    info['Shell'] = os.environ['SHELL']
+    info['Shell'] = os.environ['SHELL'].split('/')[-1]
     info['Resolution'] = grab_res()
     info['DE']=detect_desktop_environment()
     info['Architecture']=platform.machine()
