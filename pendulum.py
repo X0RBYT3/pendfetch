@@ -97,21 +97,53 @@ def plot_line_high(
         D += 2 * dx
 
 
-# Number of Pendulums to Simulate.
-epsilon = 0.00001
-g = 9.81  # Pfft, screw gravity.
-length_1, length_2 = {}, {}  # Lengths
-mass_1, mass_2 = {}, {}  # Masses
-O1, O2 = {}, {}  # Angles
-omega_1, omega_2 = {}, {}  # Angular Velocities
-# Screen parameters
-WIDTH = 1460
-HEIGHT = 1500
-d_WIDTH = 14
-d_HEIGHT = 40
+WIDTH = 1024
+HEIGHT = 1024
+d_WIDTH = 8
+d_HEIGHT = 32
 
+def sim(no_of_pendulums: int,
+        trace: bool,
+        length: float,
+        mass: float,
+        specs: bool,
+        height: int,
+        width: int,
+        dHEIGHT: int,
+        dWIDTH: int,
+        epsilon:int,
+        speed: float,
+        tracedrop:float,
+        gravity: float
+        ):
+    """
+                v["pendulums"],
+                v["trace"],
+                v["length"],
+                v["mass"],
+                v["specs"],
+                v["HEIGHT"],
+                v["WIDTH"],
+                v["dHEIGHT"],
+                v["dWIDTH"],
+                v["epsilon"],
+                v["speed"],
+                v["tracedrop"]
 
-def sim(stdscr,no_of_pendulums: int, trace: bool, length: float, mass: float,specs: bool):
+    """
+    global WIDTH, HEIGHT, d_HEIGHT, d_WIDTH
+    HEIGHT=height
+    WIDTH=width
+    d_HEIGHT = dHEIGHT
+    d_WIDTH = dWIDTH
+    epsilon = 1 * (10 ** -epsilon)
+    g = gravity  # Pfft, screw gravity.
+    length_1, length_2 = {}, {}  # Lengths
+    mass_1, mass_2 = {}, {}  # Masses
+    O1, O2 = {}, {}  # Angles
+    omega_1, omega_2 = {}, {}  # Angular Velocities
+    # Screen parameters
+
     for i in range(no_of_pendulums):
         # Define them all manually for that sweet chaos
         # EDIT THESE IF YOU WANT TO MANUALLY CHANGE PARAMETERS. #
@@ -138,22 +170,24 @@ def sim(stdscr,no_of_pendulums: int, trace: bool, length: float, mass: float,spe
     # Speed at which it runs
     # Edit the float for the love of god
     # Around 1-1.5 is good.
-    speed = 1.0 * 10
+    speed = speed * 10
     # Rate at which the trails fades, higher = faster fade.
-    trace_drop_off = 1.0
+    trace_drop_off = tracedrop
     trace_color = 0 # 0-8
     fps = 300.0
     dt = 1.0 / fps
     accumulator = 0.0
     frame_start = datetime.now()
     # Actually initialise window Now
-    # Init colours
+    stdscr = curses.initscr()
     stdscr.resize(WIDTH,HEIGHT)
     stdscr.clear()
+    # Init colours
     curses.start_color()
     curses.use_default_colors()
     for i in range(0, curses.COLORS):
         curses.init_pair(i + 1, i, -1)
+
     # Specs Stuff
     if specs:
         if platform.os == 'Windows':
@@ -307,17 +341,27 @@ def sim(stdscr,no_of_pendulums: int, trace: bool, length: float, mass: float,spe
         stdscr.refresh()
 
 
-def start(stdscr):
+def main():
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter)
-    help = ['',
-    "         Flo's Glorious Pendulum!",
-    "     --------------------------------",
-    "       Good luck solving this code",
-    "   Not even I know what half of it does",
-    "          Enjoy either way <3"]
+        add_help=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+    """
+             Flo's Glorious Pendulum!
+         --------------------------------
+           Good luck solving this code
+       Not even I know what half of it does
+              Enjoy either way <3"""))
     parser.add_argument(
         "-t", "--trace", help="Enables tracing on pendulums", action="store_true"
+    )
+    parser.add_argument(
+        "-tD",
+        "--tracedrop",
+        help="Speed at which trace fades",
+        action="store",
+        type=float,
+        default=1.0,
     )
     parser.add_argument(
         "-s", "--specs", help="Enables displaying specs down the side. REQUIRES PSUTIL", action="store_true"
@@ -346,24 +390,93 @@ def start(stdscr):
         type=float,
         default=150.0,
     )
-    # parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,help=help_str)
-    #parser.print_help()
+    parser.add_argument(
+        "-g",
+        "--gravity",
+        help="Force of gravity",
+        action="store",
+        type=float,
+        default=9.81,
+    )
+    parser.add_argument(
+        "-sP",
+        "--speed",
+        help="Speed at which pendulum runs",
+        action="store",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "-H",
+        "--HEIGHT",
+        help="Height of screen.",
+        action="store",
+        type=int,
+        default=1024,
+    )
+    parser.add_argument(
+        "-W",
+        "--WIDTH",
+        help="Width of screen.",
+        action="store",
+        type=int,
+        default=1024,
+    )
+    parser.add_argument(
+        "-dH",
+        "--dHEIGHT",
+        help="Value HEIGHT is divided by.",
+        action="store",
+        type=int,
+        default=32,
+    )
+    parser.add_argument(
+        "-dW",
+        "--dWIDTH",
+        help="Value WIDTH is divided by",
+        action="store",
+        type=int,
+        default=8,
+    )
+    parser.add_argument(
+        "-e",
+        "--epsilon",
+        help="1e-Value",
+        action="store",
+        type=int,
+        default=5,
+    )
+
+
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS)
     args = parser.parse_args()
+    parser.print_help()
     # Because I'm an idiot and I made order matter (groan)
     v = vars(args)
-    OPTIONS = [v["pendulums"], v["trace"], v["length"], v["mass"],v["specs"]]
-    for i, k in enumerate(help):
-        stdscr.addstr(i+2,0,k)
-    stdscr.addstr(9,0,
-        "Running with {0} Pendulums, Specs set to {4}, Trace set to {1}, Length of {2} and Mass of {3}".format(
-            *OPTIONS
-        )
-    )
-    stdscr.refresh()
-    sleep(3)
-    sim(stdscr,*OPTIONS)
+    # Needed for 'global' values
+    h, w = v["HEIGHT"],v["WIDTH"]
+    OPTIONS = [
+            v["pendulums"],
+            v["trace"],
+            v["length"],
+            v["mass"],
+            v["specs"],
+            h,
+            w,
+            v["dHEIGHT"],
+            v["dWIDTH"],
+            v["epsilon"],
+            v["speed"],
+            v["tracedrop"],
+            v["gravity"]
 
-def main():
-    curses.wrapper(start)
+            ]
+    print('')
+    for k, va in v.items():
+        print('{0}: {1}'.format(k,va))
+    sleep(3)
+    sim(*OPTIONS)
+
+
 if __name__ == "__main__":
     main()
