@@ -170,7 +170,7 @@ def sim(no_of_pendulums: int,
     # Speed at which it runs
     # Edit the float for the love of god
     # Around 1-1.5 is good.
-    speed = speed * 10
+    speed = speed * 1.5
     # Rate at which the trails fades, higher = faster fade.
     trace_drop_off = tracedrop
     trace_color = 0 # 0-8
@@ -320,7 +320,11 @@ def sim(no_of_pendulums: int,
 
         if specs:
             stdscr.addstr(2,0,'-'*30,curses.color_pair(2))
-            for i, x in enumerate(sys_specs.keys()):
+            i = 0
+            for x in sys_specs.keys():
+                if sys_specs[x] == '':
+                    pass
+                i+=1
                 stdscr.addstr(i+3,0,str(x),curses.color_pair(4))
 
                 stdscr.addstr(i+3,(len(x)+1),': {0}'.format(sys_specs[x].title()))
