@@ -5,7 +5,7 @@ with open("README.md",'r') as ld:
 
 setuptools.setup(
     name="double-pendulum",
-    version="1.0.21",
+    version="1.2",
     author="Nekurone",
     author_email="florencesecure@protonmail.com",
     description="A small double pendulum simulator",
