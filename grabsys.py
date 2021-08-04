@@ -1,14 +1,9 @@
 import platform
-import socket
-import re
-import uuid
-import json
-import logging
 import os
 import subprocess
+import socket
+
 import psutil
-import colorama
-import curses
 # psutil is the big one.
 
 linux_res = [
