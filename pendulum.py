@@ -343,6 +343,7 @@ def sim(no_of_pendulums: int,
 
 def main():
     parser = argparse.ArgumentParser(
+        add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(
     """
@@ -447,9 +448,9 @@ def main():
     )
 
 
-    # parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,help=help_str)
-    parser.print_help()
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS)
     args = parser.parse_args()
+    parser.print_help()
     # Because I'm an idiot and I made order matter (groan)
     v = vars(args)
     # Needed for 'global' values
@@ -470,6 +471,7 @@ def main():
             v["gravity"]
 
             ]
+    print('')
     for k, va in v.items():
         print('{0}: {1}'.format(k,va))
     sleep(3)
