@@ -38,14 +38,15 @@
 __Dependencies:__ Python 3.2+,curses (standard on UNIX) or relevent windows port, psutils if you want to use -s
 
 ### Github
-- Clone using `https://github.com/Nekurone/double-pendulum-ascii.git` or download the zip.
+- Clone using `https://github.com/Nekurone/pendfetch.git` or download the zip.
 - Extract if necessary and head inside the folder.
 - ```python3 pendulum.py [args]```
 
 ### Pip
-- `python3 -m pip install double-pendulum` (or `pip install double-pendulum`)
-- `double-pendulum [args]`
+- `python3 -m pip install pendfetch` (or `pip install pendfetch`)
+- `pendfetch [args]`
 
+#### Don't forget to include `-s` for neofetch feature :) 
 ## **__Args__**
 
 Visuals
