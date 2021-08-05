@@ -1,5 +1,6 @@
+<p align="center"><img src="https://user-images.githubusercontent.com/11583852/128283452-314f3aca-d095-4d2b-9cf9-4e7afaf8c404.png" alt="Header image: Pendfetch"></img></p>
 
-<h1 align="center">Double Pendulum Using Curses in Python.</h1>
+<h1 align="center">Show off your terminal, in style.</h1>
 
 <p align="center"><a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Build with <3" height="35"/></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with python" height="35" /></a>&nbsp;<a href="https://forthebadge.com" target="_blank"><img src="https://forthebadge.com/images/badges/powered-by-coffee.svg" height="35"/></p>
 
