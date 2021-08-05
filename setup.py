@@ -4,11 +4,11 @@ with open("README.md",'r') as ld:
     long_description = ld.read()
 
 setuptools.setup(
-    name="double-pendulum",
-    version="1.2.1",
+    name="pendfetch",
+    version="1.0.0",
     author="Nekurone",
     author_email="florencesecure@protonmail.com",
-    description="A small double pendulum simulator",
+    description="A small double pendulum based neofetch clone",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Nekurone/double-pendulum-ascii/",
@@ -25,7 +25,7 @@ setuptools.setup(
     ],
     entry_points = {
         "console_scripts":[
-            "double-pendulum=pendulum:main"
+            "pendfetch=pendulum:main"
         ]
     },
     python_requires=">=3.6",
