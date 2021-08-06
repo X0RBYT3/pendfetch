@@ -3,7 +3,6 @@ import os
 import subprocess
 import socket
 
-import psutil
 # psutil is the big one.
 
 def process(command: str):
@@ -95,5 +94,12 @@ def get_system_info():
     info['Architecture']=platform.machine()
     info['Terminal']= os.environ['TERM']
     info['Processor']=platform.processor()
-    info['RAM']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
+
+    try:
+        import psutil 
+    except ModuleNotFoundError:
+        pass
+    finally:
+        info['RAM']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
+        
     return info

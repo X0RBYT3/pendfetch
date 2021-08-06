@@ -5,7 +5,7 @@ with open("README.md",'r') as ld:
 
 setuptools.setup(
     name="pendfetch",
-    version="1.0.0",
+    version="1.0.1",
     author="Nekurone",
     author_email="florencesecure@protonmail.com",
     description="A small double pendulum based neofetch clone",
@@ -28,5 +28,5 @@ setuptools.setup(
             "pendfetch=pendulum:main"
         ]
     },
-    python_requires=">=3.6",
+    python_requires=">=3.2",
 )

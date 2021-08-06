@@ -327,7 +327,7 @@ def sim(no_of_pendulums: int,
                 i+=1
                 stdscr.addstr(i+3,0,str(x),curses.color_pair(4))
 
-                stdscr.addstr(i+3,(len(x)+1),': {0}'.format(sys_specs[x].title()))
+                stdscr.addstr(i+3,(len(x)+1),': {0}'.format(sys_specs[x]))
 
             # Add the colours
             for y in range(0,2): ##For a 2x8 Grid
