@@ -58,7 +58,7 @@ def detect_desktop_environment():
     return desktop_environment
 
 def get_user():
-    username = environ['USER']
+    username = os.environ['USER']
     hostname = process(
             'hostname',
         ).strip().rstrip('\n')
@@ -67,7 +67,6 @@ def get_user():
 def get_system_info():
     '''
     Layout of get_system_info
-
     OS: MacOS 11.4
     Host: Macbook10
     Kernel: 20.5
@@ -84,6 +83,7 @@ def get_system_info():
     '''
     info={}
     # Hacky and could be better
+    info['User'] = get_user()
     info['Hostname']=socket.gethostname()
     info['Uptime'] = get_uptime()
     info['OS']=platform.platform(aliased=True).split('-')[0]
