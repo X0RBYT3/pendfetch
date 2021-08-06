@@ -67,6 +67,7 @@ def get_user():
 def get_system_info():
     '''
     Layout of get_system_info
+
     OS: MacOS 11.4
     Host: Macbook10
     Kernel: 20.5
@@ -90,7 +91,7 @@ def get_system_info():
     info['Kernel'] = platform.release()
     info['Shell'] = os.environ['SHELL'].split('/')[-1]
     info['Resolution'] = grab_res()
-    info['DE']=detect_desktop_environment()
+    info['DE/WM']=detect_desktop_environment()
     info['Architecture']=platform.machine()
     info['Terminal']= os.environ['TERM']
     info['Processor']=platform.processor()
