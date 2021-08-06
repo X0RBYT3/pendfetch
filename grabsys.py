@@ -58,7 +58,7 @@ def detect_desktop_environment():
     return desktop_environment
 
 def get_user():
-    username = environ['USER']
+    username = os.environ['USER']
     hostname = process(
             'hostname',
         ).strip().rstrip('\n')
@@ -84,13 +84,14 @@ def get_system_info():
     '''
     info={}
     # Hacky and could be better
+    info['User'] = get_user()
     info['Hostname']=socket.gethostname()
     info['Uptime'] = get_uptime()
     info['OS']=platform.platform(aliased=True).split('-')[0]
     info['Kernel'] = platform.release()
     info['Shell'] = os.environ['SHELL'].split('/')[-1]
     info['Resolution'] = grab_res()
-    info['DE']=detect_desktop_environment()
+    info['DE/WM']=detect_desktop_environment()
     info['Architecture']=platform.machine()
     info['Terminal']= os.environ['TERM']
     info['Processor']=platform.processor()
