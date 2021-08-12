@@ -1,11 +1,12 @@
 from math import pi, sin, cos, floor, copysign
 from time import sleep
 from datetime import datetime, timedelta
-import sys, argparse, textwrap
-import os
+from signal import signal, SIGWINCH
+import argparse
+import textwrap
+import shutil
 import curses
 import platform
-import time
 
 
 # Not clean, but it works
@@ -103,6 +104,34 @@ HEIGHT = 1024
 d_WIDTH = 8
 d_HEIGHT = 32
 
+stdscr = None  # will need
+
+
+# catch resizing signal
+def resize_handler(signum, frame):
+    global WIDTH, HEIGHT, d_WIDTH, d_HEIGHT, maxyx
+    if stdscr is None:
+        return
+    curses.endwin()
+    stdscr.refresh()
+    newSize = stdscr.getmaxyx()
+    stdscr.resize(maxyx[0], maxyx[1])
+    if maxyx[0] < newSize[0]:
+        d_WIDTH += 1  # TODO find a working solution for this
+    elif maxyx[0] > newSize[0]:
+        d_WIDTH -= 1  # Horrible
+
+    if maxyx[1] < newSize[1]:
+        d_HEIGHT += 1
+    elif maxyx[1] > newSize[1]:
+        d_HEIGHT -= 1
+    maxyx = newSize
+
+
+signal(SIGWINCH, resize_handler)  # move this somewhere ??
+
+maxyx = None
+
 
 def sim(
         no_of_pendulums: int,
@@ -118,6 +147,7 @@ def sim(
         speed: float,
         tracedrop: float,
         gravity: float,
+        antialiasing: bool
 ):
     """
     v["pendulums"],
@@ -134,7 +164,7 @@ def sim(
     v["tracedrop"]
 
     """
-    global WIDTH, HEIGHT, d_HEIGHT, d_WIDTH
+    global WIDTH, HEIGHT, d_HEIGHT, d_WIDTH, stdscr, maxyx
     HEIGHT = height
     WIDTH = width
     d_HEIGHT = dHEIGHT
@@ -184,6 +214,7 @@ def sim(
     stdscr = curses.initscr()
     stdscr.resize(WIDTH, HEIGHT)
     stdscr.clear()
+    maxyx = stdscr.getmaxyx()
     # Init colours
     curses.start_color()
     curses.use_default_colors()
@@ -297,7 +328,7 @@ def sim(
                             "|",
                             curses.color_pair(i % 8 + 8),
                         )
-        except curses.error as e:
+        except curses.error:
             pass
 
         for i in range(no_of_pendulums):
@@ -308,19 +339,31 @@ def sim(
             x2 = x1 + (sin(O2[i]) * length_2[i] + d_WIDTH * 0.5) / d_WIDTH
             y2 = y1 + (cos(O2[i]) * length_2[i] + d_HEIGHT * 0.5) / d_HEIGHT
             if i % 2 == 0:
-                draw_anti_alias_line(
-                    stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, False
-                )
-                draw_anti_alias_line(stdscr, x1, y1, x2, y2, False)
+                if antialiasing:
+                    draw_anti_alias_line(
+                        stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, False
+                    )
+                    draw_anti_alias_line(stdscr, x1, y1, x2, y2, False)
+                else:
+                    draw_line(
+                        stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, "*"
+                    )
+                    draw_line(stdscr, x1, y1, x2, y2, "*")
                 # stdscr.addstr(0,0,'{} {} {} {}'.format(x1,y1,x2,y2))
                 draw_point(stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "@")
                 draw_point(stdscr, x1, y1, "@", color=False)
                 draw_point(stdscr, x2, y2, "@", color=False)
             else:
-                draw_anti_alias_line(
-                    stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, True
-                )
-                draw_anti_alias_line(stdscr, x1, y1, x2, y2, True)
+                if antialiasing:
+                    draw_anti_alias_line(
+                        stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, True
+                    )
+                    draw_anti_alias_line(stdscr, x1, y1, x2, y2, True)
+                else:
+                    draw_line(
+                        stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, x1, y1, "#"
+                    )
+                    draw_line(stdscr, x1, y1, x2, y2, "#")
                 draw_point(stdscr, WIDTH / 2 / d_WIDTH, HEIGHT / d_HEIGHT / 2, "@")
                 draw_point(stdscr, x1, y1, "@", color=False)
                 draw_point(stdscr, x2, y2, "@", color=False)
@@ -340,7 +383,10 @@ def sim(
             for y in range(0, 2):  ##For a 2x8 Grid
                 for x in range(0, 8):
                     i = y * 4 + x
-                    stdscr.addstr(y + 20, 2 * x, "██", curses.color_pair(i))
+                    try:
+                        stdscr.addstr(y + 20, 2 * x, "██", curses.color_pair(i))
+                    except curses.error:
+                        pass
         stdscr.addstr(
             0,
             0,
@@ -374,12 +420,17 @@ def rfpart(x):
 
 
 def draw_better_point(screen: curses.window, x: float, y: float, c: str, color: int):
-    screen.addstr(int(y), int(x), c, curses.color_pair(color))
+    try:
+        screen.addstr(int(y), int(x), c, curses.color_pair(color))
+    except curses.error:
+        pass
 
 
 def draw_anti_alias_point(
         screen: curses.window, x: float, y: float, c: float, isSecond: bool
 ):
+    if x < 0 or y < 0 or x >= WIDTH / d_WIDTH or y >= HEIGHT / d_HEIGHT:
+        return
     if isSecond:
         color = 10
     else:
@@ -459,6 +510,9 @@ def main():
        Not even I know what half of it does
               Enjoy either way <3"""
         ),
+    )
+    parser.add_argument(
+        "-aa", "--antialiasing", help="Enables AntiAliasing on pendulums", action="store_true"
     )
     parser.add_argument(
         "-t", "--trace", help="Enables tracing on pendulums", action="store_true"
@@ -579,12 +633,16 @@ def main():
         v["speed"],
         v["tracedrop"],
         v["gravity"],
+        v["antialiasing"]
     ]
     print("")
     for k, va in v.items():
         print("{0}: {1}".format(k, va))
     sleep(3)
-    sim(*OPTIONS)
+    try:
+        sim(*OPTIONS)
+    except InterruptedError:
+        curses.endwin()
 
 
 if __name__ == "__main__":
