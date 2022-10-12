@@ -6,7 +6,8 @@ import curses
 import platform
 
 # Not clean, but it works
-
+# This is a rather basic implentation of Bresenham's line algorithm
+# I feel that the maths behind this Line Algorithm could be moved to another file?
 
 def draw_point(screen: curses.window, A: int, B: int, c: str, color=True):
     # Broken for now while I update. Check back soon :)
@@ -22,7 +23,6 @@ def draw_point(screen: curses.window, A: int, B: int, c: str, color=True):
     except curses.error:
         pass
     # curses.color_pair(int(B)%16)
-
 
 def draw_line(screen: curses.window, A: float, B: float, C: float, D: float, c: str):
 
@@ -97,7 +97,7 @@ def plot_line_high(
             D -= 2 * dy
         D += 2 * dx
 
-
+# These values are nice and generic
 WIDTH = 1024
 HEIGHT = 1024
 d_WIDTH = 8
@@ -196,6 +196,8 @@ def sim(
             print("Unfortunately -s --specs isn't available for windows right now.")
             specs = False
         else:
+            # Import after check to avoid import errors
+            # Could also be done with a try except, but I prefer this method
             import grabsys
 
             sys_specs = grabsys.get_system_info()
@@ -216,7 +218,8 @@ def sim(
         # Prepare for a calculations headache.
         while accumulator > dt:
             for i in range(no_of_pendulums):
-
+                # I still can't believe this is one line.
+                # Imagine if this wasn't formatted.
                 a1 = (
                     -g * (2 * mass_1[i] + mass_2[i]) * sin(O1[i])
                     - g * mass_2[i] * sin(O1[i] - 2 * O2[i])
@@ -235,7 +238,8 @@ def sim(
                         - mass_2[i] * cos(2 * O1[i] - 2 * O2[i])
                     )
                 )
-
+                # The same calculations, but for the second pendulum. 
+                # In future, I plan on making a triple pendulum
                 a2 = (
                     (2 * sin(O1[i] - O2[i]))
                     * (
@@ -260,7 +264,10 @@ def sim(
                 O1[i] += speed * omega_1[i] * dt
                 O2[i] += speed * omega_2[i] * dt
             accumulator -= dt
+            
             if trace:
+                # For some reason this feels really jank????
+                # I feel this can be formatted into another loop
                 for i in range(int(HEIGHT / d_HEIGHT)):
                     for j in range(int(WIDTH / d_WIDTH)):
                         if trace[i][j] > 0:
@@ -298,10 +305,14 @@ def sim(
                             "|",
                             curses.color_pair(i % 8 + 8),
                         )
-        except curses.error as e:
+        except curses.error as e: 
+            # Ahem, uhhhhhhhh
+            # We don't talk about this.
             pass
 
         for i in range(no_of_pendulums):
+            # This looks HORRIFIC but is remarkably easy to understand once you read it 
+            # Better formatting in future??? - 2022/10/12
             x1 = (WIDTH / 2 + sin(O1[i]) * length_1[i] + d_WIDTH * 0.5) / d_WIDTH
             y1 = (
                 cos(O1[i]) * length_1[i] + d_HEIGHT * 0.5
@@ -351,7 +362,7 @@ def sim(
         stdscr.refresh()
 
 
-def main():
+def main(): # I feel this could all be moved to another file?
     parser = argparse.ArgumentParser(
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
