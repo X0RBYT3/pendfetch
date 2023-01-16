@@ -356,7 +356,7 @@ def sim(
         stdscr.addstr(
             0,
             0,
-            "Flo's Double Pendulum. Number of Pendulums: {0}.".format(no_of_pendulums),
+            "X0R's Double Pendulum. Number of Pendulums: {0}.".format(no_of_pendulums),
             curses.color_pair(5),
         )
         stdscr.refresh()
@@ -368,11 +368,10 @@ def main(): # I feel this could all be moved to another file?
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(
             """
-             Flo's Glorious Pendulum!
+             X0R's Double Pendulum
          --------------------------------
            Good luck solving this code
-       Not even I know what half of it does
-              Enjoy either way <3"""
+       Not even I know what half of it does."""
         ),
     )
     parser.add_argument(
